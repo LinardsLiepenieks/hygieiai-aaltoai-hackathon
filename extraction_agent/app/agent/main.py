@@ -19,6 +19,7 @@ def process_text(text: Optional[str]) -> None:
         print("agent.process_text called with no text")
     else:
         print("agent.process_text called with:", text)
+        print("HER2")
 
 
 def simple_notify() -> None:
