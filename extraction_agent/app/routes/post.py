@@ -29,7 +29,6 @@ async def receive_post(request: Request):
         received_text = None
 
     if received_text is not None:
-        # call into agent to process the text
         try:
             process_text(received_text)
         except Exception as e:
