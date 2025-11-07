@@ -35,3 +35,21 @@ services:
       - ./extraction_agent:/app:cached
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
     restart: unless-stopped
+
+  summary_agent:
+    build: ./summary_agent
+    ports:
+      - '8002:8002'
+    volumes:
+      - ./summary_agent:/app:cached
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+    restart: unless-stopped
+
+  response_agent:
+    build: ./response_agent
+    ports:
+      - '8003:8003'
+    volumes:
+      - ./response_agent:/app:cached
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
+    restart: unless-stopped
