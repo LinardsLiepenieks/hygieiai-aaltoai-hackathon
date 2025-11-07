@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import useRecording from '../hooks/useRecording';
+import useTextToSpeech from '../hooks/useTextToSpeech';
 
 export default function Home() {
   const [text, setText] = useState<string>('');
@@ -29,6 +30,14 @@ export default function Home() {
       setStatus('Error: ' + err.message);
     }
   };
+
+  const {
+    speak,
+    stop: stopTTS,
+    status: ttsStatus,
+    isPlaying: ttsPlaying,
+    hasApiKey: ttsHasKey,
+  } = useTextToSpeech();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
@@ -73,6 +82,15 @@ export default function Home() {
             ) : (
               'Tap to Speak'
             )}
+          </button>
+
+          <button
+            onClick={() => speak(text)}
+            disabled={!text.trim() || !ttsHasKey}
+            className="flex-none px-5 py-4 rounded-3xl font-semibold text-lg bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow hover:shadow-md disabled:from-gray-300 disabled:cursor-not-allowed transition-all"
+            title={ttsStatus}
+          >
+            {ttsPlaying ? 'Reading…' : 'Read Text'}
           </button>
 
           <button
