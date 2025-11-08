@@ -25,8 +25,11 @@ export default function ScheduleSidebar({
 
   const { speak } = useTextToSpeech();
 
+  // Use relative URLs to go through Caddy reverse proxy in production
   const SCHEDULE_AGENT_URL =
-    process.env.NEXT_PUBLIC_SCHEDULE_AGENT_URL || 'http://localhost:8004';
+    typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+      ? '/api' // Production: use Caddy reverse proxy
+      : process.env.NEXT_PUBLIC_SCHEDULE_AGENT_URL || 'http://localhost:8004'; // Dev: direct connection
 
   const startDemo = async () => {
     setMessages([]);
