@@ -78,7 +78,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="relative flex h-screen">
       {/* Left: your existing UI with navbar */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Navbar */}
@@ -162,8 +162,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Right: scheduling sidebar */}
-      <ScheduleSidebar isOpen={isSidebarOpen} />
+      {/* Overlay backdrop for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black z-40 lg:hidden transition-opacity duration-300 ease-in-out opacity-70"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Right: scheduling sidebar - overlay on mobile, side-by-side on desktop */}
+      <ScheduleSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
     </div>
   );
 }
