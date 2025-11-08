@@ -35,8 +35,18 @@ curl -s http://localhost:8004/schedule/start?service=dentist
 
 echo ""
 echo ""
-echo "🧪 Testing schedule agent through Caddy..."
+echo "🧪 Testing from inside Caddy container..."
+docker exec $CADDY_CONTAINER wget -qO- http://schedule_agent:8004/schedule/start?service=dentist
+
+echo ""
+echo ""
+echo "🧪 Testing schedule agent through Caddy HTTPS..."
 curl -s https://hygieiai.chickenkiller.com/api/schedule/start?service=dentist
+
+echo ""
+echo ""
+echo "🧪 Testing schedule agent through Caddy HTTP..."
+curl -s http://hygieiai.chickenkiller.com/api/schedule/start?service=dentist
 
 echo ""
 echo ""
