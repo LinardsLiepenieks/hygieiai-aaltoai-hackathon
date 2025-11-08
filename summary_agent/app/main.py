@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-FINAL_MESSAGE = "TEST"
+FINAL_MESSAGE = "I HAVE BACK PAIN"
 
 
 @app.on_event("startup")

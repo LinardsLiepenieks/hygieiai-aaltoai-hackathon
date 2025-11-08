@@ -48,7 +48,7 @@ async def receive_post(request: Request):
 
         if final_msg:
             print("Fetched FINAL_MESSAGE from summary_agent:", final_msg)
-
+        print("HERE")
         processed = process_text(received_text, final_msg)
         print("PROCESSED", processed)
     except Exception as e:
