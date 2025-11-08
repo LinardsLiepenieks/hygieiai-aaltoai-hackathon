@@ -19,6 +19,17 @@ def build_llm_prompt(
     safety_ok: bool,
 ) -> str:
     """Build a comprehensive prompt for the LLM with all context and flags."""
+    memory = memory or ""
+    text = text or ""
+    intent = intent or "smalltalk"
+    essence = essence or ""
+    red_flags = red_flags or []
+    confidence = confidence if confidence is not None else 0.0
+    keyword_sieve = keyword_sieve if keyword_sieve is not None else False
+    emergency_pattern = emergency_pattern if emergency_pattern is not None else False
+    medically_relevant = medically_relevant if medically_relevant is not None else False
+    emergency_flag = emergency_flag if emergency_flag is not None else False
+    safety_ok = safety_ok if safety_ok is not None else True
 
     prompt = f"""USER MESSAGE:
 {text}
