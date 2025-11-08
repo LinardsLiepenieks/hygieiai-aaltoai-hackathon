@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Query
 from fastapi.responses import JSONResponse, PlainTextResponse
 from ..agent.main import start_session, handle_user
 
 router = APIRouter()
 
 @router.get("/schedule/start")
-async def start():
-    return JSONResponse(start_session())
+async def start(service: str | None = Query(default=None)):
+    return JSONResponse(start_session(service))
 
 @router.post("/schedule/post")
 async def post_root(request: Request):

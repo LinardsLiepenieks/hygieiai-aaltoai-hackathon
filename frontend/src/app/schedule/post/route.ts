@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
-const AGENT = process.env.SCHEDULE_AGENT_URL || "http://schedule_agent:8004";
+const AGENT = "http://localhost:8004";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
