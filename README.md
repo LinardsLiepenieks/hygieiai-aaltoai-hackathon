@@ -25,6 +25,7 @@ Futuuri Hygiei AI enables healthcare providers to maintain continuous contact wi
 
 - FastAPI (Python)
 - Docker Compose orchestration
+- Deployed on Datacrunch
 
 **AI & Voice**
 
@@ -46,7 +47,7 @@ Futuuri Hygiei AI enables healthcare providers to maintain continuous contact wi
        ├──────────────────┬──────────────────┬──────────────────┐
        ▼                  ▼                  ▼                  ▼
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Extraction  │───▶│  Summary    │    │  Response   │    │ Scheduling  │
+│ Extraction  │───▶│  Summary    │───▶│  Response   │    │ Scheduling  │
 │   Agent     │    │   Agent     │    │   Agent     │    │   Agent     │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
      (Analyst)        (Librarian)       (Communicator)     (Coordinator)

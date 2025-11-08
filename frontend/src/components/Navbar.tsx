@@ -17,7 +17,7 @@ export default function Navbar({
                 Futuuri: Hygiei AI
               </h1>
               <p className="text-xs text-blue-200 font-medium">
-                (Llama 3.3 and ElevenLabs Scribe)
+                (Llama 3.3 and ElevenLabs Scribe, deployed on Datacrunch)
               </p>
             </div>
           </div>
