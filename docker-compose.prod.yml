@@ -1,5 +1,29 @@
 version: '3.8'
+
 services:
+  # Caddy reverse proxy with automatic HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: hygiei-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80' # HTTP
+      - '443:443' # HTTPS
+      - '443:443/udp' # HTTP/3
+      - '3000:3000' # Direct access (fallback if no domain configured)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - hygiei-network
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+
   frontend:
     build:
       context: ./frontend
@@ -8,56 +32,90 @@ services:
         NEXT_PUBLIC_ELEVENLABS_API_KEY: ${NEXT_PUBLIC_ELEVENLABS_API_KEY}
         NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8000}
         NEXT_PUBLIC_SCHEDULE_AGENT_URL: ${NEXT_PUBLIC_SCHEDULE_AGENT_URL:-http://localhost:8004}
-    ports:
-      - '3000:3000'
+    expose:
+      - '3000'
     depends_on:
       - backend
       - extraction_agent
     environment:
       - NODE_ENV=production
     restart: unless-stopped
+    networks:
+      - hygiei-network
 
   backend:
     build: ./backend
+    expose:
+      - '8000'
     ports:
-      - '8000:8000'
+      - '8000:8000' # Keep for direct access/debugging
     env_file:
       - .env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
     restart: unless-stopped
+    networks:
+      - hygiei-network
 
   extraction_agent:
     build: ./extraction_agent
+    expose:
+      - '8001'
     ports:
-      - '8001:8001'
+      - '8001:8001' # Keep for direct access/debugging
     env_file:
       - .env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --workers 2
     restart: unless-stopped
+    networks:
+      - hygiei-network
 
   summary_agent:
     build: ./summary_agent
+    expose:
+      - '8002'
     ports:
-      - '8002:8002'
+      - '8002:8002' # Keep for direct access/debugging
     env_file:
       - .env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --workers 2
     restart: unless-stopped
+    networks:
+      - hygiei-network
 
   response_agent:
     build: ./response_agent
+    expose:
+      - '8003'
     ports:
-      - '8003:8003'
+      - '8003:8003' # Keep for direct access/debugging
     env_file:
       - .env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --workers 2
     restart: unless-stopped
+    networks:
+      - hygiei-network
 
   schedule_agent:
     build: ./schedule_agent
+    expose:
+      - '8004'
     ports:
-      - '8004:8004'
+      - '8004:8004' # Keep for direct access/debugging
     env_file:
       - .env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8004 --workers 2
     restart: unless-stopped
+    networks:
+      - hygiei-network
+
+networks:
+  hygiei-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+  caddy_logs:
+    driver: local

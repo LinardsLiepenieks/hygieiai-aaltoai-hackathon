@@ -1,0 +1,65 @@
+# Caddyfile for Futuuri Hygiei AI
+
+{
+    email admin@hygieiai.com  # Email for Let's Encrypt SSL notifications
+}
+
+# Localhost configuration (for testing without domain)
+# Commented out since we're using a domain now
+# :3000 {
+#     reverse_proxy frontend:3000
+#     encode gzip
+# }
+
+# Production domain configuration
+hygieiai.ignorelist.com {
+    reverse_proxy frontend:3000
+    
+    # Enable compression
+    encode gzip
+    
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Prevent clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        # Prevent MIME sniffing
+        X-Content-Type-Options "nosniff"
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Referrer policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # API routes (if you want to use /api path instead of subdomain)
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy backend:8000
+    }
+    
+    # Logs
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
+
+# API subdomain (optional - only if you set up api.hygieiai.ignorelist.com DNS)
+api.hygieiai.ignorelist.com {
+    reverse_proxy backend:8000
+    
+    encode gzip
+    
+    # CORS headers
+    header {
+        Access-Control-Allow-Origin "https://hygieiai.ignorelist.com"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    log {
+        output file /var/log/caddy/api-access.log
+        format json
+    }
+}
