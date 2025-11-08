@@ -2,16 +2,26 @@
 
 {
     email admin@hygieiai.com  # Email for Let's Encrypt SSL notifications
+    auto_https disable_redirects  # Don't auto-redirect HTTP to HTTPS for IP addresses
 }
 
-# Localhost configuration (for testing without domain)
-# Commented out since we're using a domain now
-# :3000 {
-#     reverse_proxy frontend:3000
-#     encode gzip
-# }
+# HTTP listener on port 80 for IP-based access (no SSL)
+http:// {
+    # Only respond to requests without a proper domain
+    @ip_access {
+        not host hygieiai.ignorelist.com api.hygieiai.ignorelist.com
+    }
+    handle @ip_access {
+        reverse_proxy frontend:3000
+    }
+    
+    # For domain requests, allow ACME challenges but don't proxy
+    handle {
+        # This allows ACME HTTP-01 challenges to work
+    }
+}
 
-# Production domain configuration
+# Production domain configuration (HTTPS)
 hygieiai.ignorelist.com {
     reverse_proxy frontend:3000
     
