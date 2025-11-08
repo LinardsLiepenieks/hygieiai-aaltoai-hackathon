@@ -23,8 +23,6 @@ http:// {
 
 # Production domain configuration (HTTPS)
 hygieiai.chickenkiller.com {
-    reverse_proxy frontend:3000
-    
     # Enable compression
     encode gzip
     
@@ -42,10 +40,20 @@ hygieiai.chickenkiller.com {
         Referrer-Policy "strict-origin-when-cross-origin"
     }
     
-    # API routes (if you want to use /api path instead of subdomain)
+    # API routes - route to different agents based on path
+    handle /api/schedule/* {
+        uri strip_prefix /api
+        reverse_proxy schedule_agent:8004
+    }
+    
     handle /api/* {
         uri strip_prefix /api
         reverse_proxy backend:8000
+    }
+    
+    # Default: serve frontend
+    handle {
+        reverse_proxy frontend:3000
     }
     
     # Logs

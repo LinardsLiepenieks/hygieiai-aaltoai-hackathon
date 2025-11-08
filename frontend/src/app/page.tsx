@@ -155,7 +155,7 @@ export default function Home() {
                 disabled={!text.trim()}
                 className="flex-1 py-3 rounded-lg font-semibold text-base bg-teal-500 text-white hover:bg-teal-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
               >
-                Send to Backend
+                Send
               </button>
             </div>
           </div>
