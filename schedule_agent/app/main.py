@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # import and include routers
 from .routes.post import router as post_router
 
-app = FastAPI(title="response_agent")
+app = FastAPI(title="schedule_agent")
 
 # Allow any origin for development convenience
 app.add_middleware(
@@ -15,15 +15,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.on_event("startup")
-async def startup_event():
-    app.include_router(post_router)
+# Include router immediately (not in startup event)
+app.include_router(post_router)
 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello from response agent"}
+    return {"message": "Hello from schedule agent"}
 
 
 @app.get("/health")
