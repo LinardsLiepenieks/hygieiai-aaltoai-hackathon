@@ -57,4 +57,4 @@ async def receive_post(request: Request):
         # log but don't fail the original request
         print("Failed to forward to extraction_agent:", e)
 
-    return PlainTextResponse("RECIEVED POST")
+    return PlainTextResponse(resp.text)
