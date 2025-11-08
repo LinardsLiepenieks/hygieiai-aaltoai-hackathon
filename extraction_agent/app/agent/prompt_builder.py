@@ -24,6 +24,7 @@ def build_llm_prompt(
     intent = intent or "smalltalk"
     essence = essence or ""
     red_flags = red_flags or []
+    red_flags = [flag for flag in red_flags if flag is not None]
     confidence = confidence if confidence is not None else 0.0
     keyword_sieve = keyword_sieve if keyword_sieve is not None else False
     emergency_pattern = emergency_pattern if emergency_pattern is not None else False
