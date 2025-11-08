@@ -13,8 +13,9 @@ async def receive_post(request: Request):
     body = await request.body()
     content_type = request.headers.get("content-type", "application/json")
 
-    # Forward to extraction_agent
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    # Forward to extraction_agent (increase timeout to allow slower downstream responses)
+    # You can tune this value or replace with httpx.Timeout for finer control.
+    async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
             "http://extraction_agent:8001/post",
             content=body,

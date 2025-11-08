@@ -15,7 +15,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-FINAL_MESSAGE = "I HAVE BACK PAIN"
+FINAL_MESSAGE = ""
+
+
+def setFinalMessage(summary):
+    global FINAL_MESSAGE
+    print("SETTING SUMMARY", summary)
+    FINAL_MESSAGE = summary
 
 
 @app.on_event("startup")

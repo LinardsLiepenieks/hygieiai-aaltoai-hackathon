@@ -61,9 +61,12 @@ async def receive_post(request: Request):
     # forward to response_agent
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            # include the original received_text as the 'user' field so the
+            # response agent receives both the processed output and the
+            # original user message.
             resp = await client.post(
                 "http://response_agent:8003/post",
-                json={"text": processed},
+                json={"text": processed, "user_message": received_text},
                 headers={"Content-Type": "application/json"},
             )
             return PlainTextResponse(resp.text, status_code=resp.status_code)
