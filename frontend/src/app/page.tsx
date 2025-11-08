@@ -26,6 +26,17 @@ export default function Home() {
       });
       const msg = await res.text();
       setStatus('Sent: ' + msg);
+      try {
+        // Narrate the backend response if TTS is available
+        if (msg && typeof speak === 'function') {
+          speak(msg);
+        }
+      } catch (ttsErr) {
+        // Don't let TTS errors break the main flow; just update status
+        setStatus((s) => s + ' • TTS Error');
+        // eslint-disable-next-line no-console
+        console.error('TTS error:', ttsErr);
+      }
     } catch (err: any) {
       setStatus('Error: ' + err.message);
     }

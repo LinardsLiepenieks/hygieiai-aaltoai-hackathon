@@ -8,7 +8,7 @@ import os, json
 from typing import Optional, Dict, Any
 import httpx
 
-OR_KEY = "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"
+OR_KEY = "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"
 OR_BASE = "https://openrouter.ai/api/v1"
 
 MODEL_CLS = "meta-llama/llama-3.1-70b-instruct"
