@@ -8,14 +8,15 @@ from typing import Optional, Dict, Any
 import httpx
 from .prompt_builder import build_llm_prompt
 
-OR_KEY = "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"
-OR_BASE = "https://openrouter.ai/api/v1"
+OR_KEY = os.getenv("OPENROUTER_API_KEY")
+OR_BASE = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
-MODEL_CLS = "meta-llama/llama-3.1-70b-instruct"
-MODEL_RSP = "meta-llama/llama-3.1-70b-instruct"
-MODEL_SFT = "meta-llama/llama-3.1-70b-instruct"
+MODEL_CLS = os.getenv("MODEL_CLASSIFIER", "meta-llama/llama-3.1-70b-instruct")
+MODEL_RSP = os.getenv("MODEL_RESPONDER", "meta-llama/llama-3.1-70b-instruct")
+MODEL_SFT = os.getenv("MODEL_SAFETY", "meta-llama/llama-3.1-70b-instruct")
+
 if not OR_KEY:
-    raise SystemExit("Missing OPENROUTER_API_KEY")
+    raise SystemExit("Missing OPENROUTER_API_KEY environment variable")
 
 # ---- keyword gates ----
 EMERGENCY_PATTERNS = [
@@ -100,8 +101,8 @@ Return ONLY JSON with: medically_relevant:boolean, emergency:boolean, safety_ok:
 def _or_chat(model: str, system: str, user: str, json_mode: bool = False) -> str:
     headers = {
         "Authorization": f"Bearer {OR_KEY}",
-        "HTTP-Referer": "https://hack.local",
-        "X-Title": "HygieiAI",
+        "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "https://hack.local"),
+        "X-Title": os.getenv("OPENROUTER_TITLE", "HygieiAI"),
     }
     payload: Dict[str, Any] = {
         "model": model,

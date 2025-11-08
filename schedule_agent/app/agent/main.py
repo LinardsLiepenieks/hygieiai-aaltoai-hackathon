@@ -12,25 +12,31 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import httpx
 
-OR_KEY = "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"
-OR_BASE = "https://openrouter.ai/api/v1"
+OR_KEY = os.getenv("OPENROUTER_API_KEY")
+OR_BASE = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
-MODEL = "meta-llama/llama-3.1-70b-instruct"
+MODEL = os.getenv("MODEL_SCHEDULER", "meta-llama/llama-3.1-70b-instruct")
 
 # ---- demo data (local ISO "YYYY-MM-DDTHH:MM") ----
 AVAILABILITY: Dict[str, List[str]] = {
     "dentist": [
-        "2025-11-09T10:00", "2025-11-09T14:30",
-        "2025-11-10T09:00", "2025-11-10T13:00",
+        "2025-11-09T10:00",
+        "2025-11-09T14:30",
+        "2025-11-10T09:00",
+        "2025-11-10T13:00",
         "2025-11-11T11:00",
     ],
     "physio": [
-        "2025-11-09T16:00", "2025-11-10T10:30",
-        "2025-11-11T09:00", "2025-11-12T15:00",
+        "2025-11-09T16:00",
+        "2025-11-10T10:30",
+        "2025-11-11T09:00",
+        "2025-11-12T15:00",
     ],
     "checkup": [
-        "2025-11-09T11:30", "2025-11-10T08:30",
-        "2025-11-10T15:00", "2025-11-12T09:30",
+        "2025-11-09T11:30",
+        "2025-11-10T08:30",
+        "2025-11-10T15:00",
+        "2025-11-12T09:30",
     ],
 }
 
@@ -38,20 +44,31 @@ SESSIONS: Dict[str, Dict] = {}  # in-memory state
 
 ALLOWED_SERVICES = {"dentist", "physio", "checkup"}
 
+
 def _normalize_service(s: Optional[str]) -> str:
-    if not s: return "dentist"
+    if not s:
+        return "dentist"
     s = s.strip().lower()
-    if "physio" in s: return "physio"
-    if "dent" in s: return "dentist"
-    if "check" in s or "gp" in s or "doctor" in s: return "checkup"
+    if "physio" in s:
+        return "physio"
+    if "dent" in s:
+        return "dentist"
+    if "check" in s or "gp" in s or "doctor" in s:
+        return "checkup"
     return "dentist"
+
 
 def _detect_service(text: str) -> Optional[str]:
     t = text.lower()
-    if "dent" in t: return "dentist"
-    if "physio" in t or "physiother" in t: return "physio"
-    if "checkup" in t or "check up" in t or "gp" in t or "doctor" in t: return "checkup"
+    if "dent" in t:
+        return "dentist"
+    if "physio" in t or "physiother" in t:
+        return "physio"
+    if "checkup" in t or "check up" in t or "gp" in t or "doctor" in t:
+        return "checkup"
     return None
+
+
 SYSTEM = """You are a persistent, polite scheduling assistant for older adults.
 Goal: schedule an appointment. Keep replies short, clear, and friendly.
 
@@ -69,20 +86,23 @@ Rules:
 - No extra text outside JSON.
 """
 
+
 def _fmt(dt: str) -> str:
     return datetime.fromisoformat(dt).strftime("%a %d %b %H:%M")
+
 
 def _context(service: str) -> str:
     slots = "\n".join(AVAILABILITY.get(service, []))
     return f"SERVICE: {service}\nAVAILABILITY_ISO:\n{slots or '(none)'}"
+
 
 def _or_chat_json(system: str, user: str) -> Optional[dict]:
     if not OR_KEY:
         return None
     headers = {
         "Authorization": f"Bearer {OR_KEY}",
-        "HTTP-Referer": "http://local.scheduling",
-        "X-Title": "Schedule Agent",
+        "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "http://local.scheduling"),
+        "X-Title": os.getenv("OPENROUTER_TITLE", "Schedule Agent"),
     }
     payload = {
         "model": MODEL,
@@ -92,7 +112,9 @@ def _or_chat_json(system: str, user: str) -> Optional[dict]:
         ],
         "response_format": {"type": "json_object"},
     }
-    r = httpx.post(f"{OR_BASE}/chat/completions", headers=headers, json=payload, timeout=60)
+    r = httpx.post(
+        f"{OR_BASE}/chat/completions", headers=headers, json=payload, timeout=60
+    )
     r.raise_for_status()
     raw = r.json()["choices"][0]["message"]["content"]
     try:
@@ -100,17 +122,21 @@ def _or_chat_json(system: str, user: str) -> Optional[dict]:
     except Exception:
         return None
 
+
 def _consume_slot(service: str, iso: str) -> None:
     if iso in AVAILABILITY.get(service, []):
         AVAILABILITY[service].remove(iso)
 
-def _or_chat_json_ctx_history(system: str, context: str, history: list[dict]) -> Optional[dict]:
+
+def _or_chat_json_ctx_history(
+    system: str, context: str, history: list[dict]
+) -> Optional[dict]:
     if not OR_KEY:
         return None
     headers = {
         "Authorization": f"Bearer {OR_KEY}",
-        "HTTP-Referer": "http://local.scheduling",
-        "X-Title": "Schedule Agent",
+        "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "http://local.scheduling"),
+        "X-Title": os.getenv("OPENROUTER_TITLE", "Schedule Agent"),
     }
     # Cap history to avoid long prompts
     hist = history[-16:] if len(history) > 16 else history
@@ -123,13 +149,16 @@ def _or_chat_json_ctx_history(system: str, context: str, history: list[dict]) ->
         ),
         "response_format": {"type": "json_object"},
     }
-    r = httpx.post(f"{OR_BASE}/chat/completions", headers=headers, json=payload, timeout=60)
+    r = httpx.post(
+        f"{OR_BASE}/chat/completions", headers=headers, json=payload, timeout=60
+    )
     r.raise_for_status()
     raw = r.json()["choices"][0]["message"]["content"]
     try:
         return json.loads(raw)
     except Exception:
         return None
+
 
 # --- replace start_session() ---
 def start_session(service: Optional[str] = None) -> Dict:
@@ -141,9 +170,9 @@ def start_session(service: Optional[str] = None) -> Dict:
 
     ctx = _context(svc)
     # Ask the model to open the conversation
-    resp = _or_chat_json_ctx_history(SYSTEM, ctx, [
-        {"role": "user", "content": "BEGIN OUTREACH"}  # seed turn
-    ])
+    resp = _or_chat_json_ctx_history(
+        SYSTEM, ctx, [{"role": "user", "content": "BEGIN OUTREACH"}]  # seed turn
+    )
 
     if not resp:
         opts = [_fmt(s) for s in AVAILABILITY[svc][:3]]
@@ -174,7 +203,12 @@ def handle_user(session_id: str, text: str) -> Dict:
         opts = [_fmt(s) for s in AVAILABILITY[svc][:3]]
         reply = f"I couldn’t check that time. Available {svc} slots: {', '.join(opts)}. Which should I book?"
         hist.append({"role": "assistant", "content": reply})
-        return {"session_id": session_id, "reply": reply, "status": "ongoing", "service": svc}
+        return {
+            "session_id": session_id,
+            "reply": reply,
+            "status": "ongoing",
+            "service": svc,
+        }
 
     # allow model to switch service explicitly
     llm_service = resp.get("service")
@@ -195,7 +229,12 @@ def handle_user(session_id: str, text: str) -> Dict:
             final = f"Okay, your appointment has been made for {svc} on {when_text}. This demo will now reset."
             hist.append({"role": "assistant", "content": final})
             SESSIONS.pop(session_id, None)
-            return {"session_id": session_id, "reply": final, "status": "confirmed", "service": svc}
+            return {
+                "session_id": session_id,
+                "reply": final,
+                "status": "confirmed",
+                "service": svc,
+            }
         else:
             opts = [_fmt(s) for s in AVAILABILITY[svc][:3]]
             reply = f"That time isn’t available. Next {svc} slots: {', '.join(opts)}. Which should I book?"
@@ -205,5 +244,9 @@ def handle_user(session_id: str, text: str) -> Dict:
     # trim history to protect context length
     if len(hist) > 24:
         SESSIONS[session_id]["history"] = hist[-24:]
-    return {"session_id": session_id, "reply": reply, "status": "ongoing", "service": svc}
-
+    return {
+        "session_id": session_id,
+        "reply": reply,
+        "status": "ongoing",
+        "service": svc,
+    }
