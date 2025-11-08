@@ -15,6 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+FINAL_MESSAGE = "TEST"
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -29,3 +31,9 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/final-message")
+async def final_message():
+    """Return the FINAL_MESSAGE variable for quick access."""
+    return {"final_message": FINAL_MESSAGE}

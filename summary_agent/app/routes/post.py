@@ -4,6 +4,8 @@ import json
 
 router = APIRouter()
 
+FINAL_MESSAGE = "TEST"
+
 
 @router.post("/post")
 async def receive_post(request: Request):
