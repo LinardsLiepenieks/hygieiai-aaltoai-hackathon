@@ -32,7 +32,7 @@ if [ "$HAS_DOMAIN" = "y" ] || [ "$HAS_DOMAIN" = "Y" ]; then
     
     # Use HTTPS URLs
     BASE_URL="https://${DOMAIN}"
-    API_URL="https://api.${DOMAIN}"
+    API_URL="https://${DOMAIN}/api"  # Using /api path instead of subdomain
     USE_HTTPS=true
 else
     # Use HTTP with IP

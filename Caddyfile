@@ -9,7 +9,7 @@
 http:// {
     # Only respond to requests without a proper domain
     @ip_access {
-        not host hygieiai.ignorelist.com api.hygieiai.ignorelist.com
+        not host hygieiai.ignorelist.com
     }
     handle @ip_access {
         reverse_proxy frontend:3000
@@ -55,21 +55,23 @@ hygieiai.ignorelist.com {
     }
 }
 
-# API subdomain (optional - only if you set up api.hygieiai.ignorelist.com DNS)
-api.hygieiai.ignorelist.com {
-    reverse_proxy backend:8000
-    
-    encode gzip
-    
-    # CORS headers
-    header {
-        Access-Control-Allow-Origin "https://hygieiai.ignorelist.com"
-        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
-    }
-    
-    log {
-        output file /var/log/caddy/api-access.log
-        format json
-    }
-}
+# API subdomain (commented out - using /api path instead)
+# Uncomment only if you create api.hygieiai.ignorelist.com DNS A record
+#
+# api.hygieiai.ignorelist.com {
+#     reverse_proxy backend:8000
+#     
+#     encode gzip
+#     
+#     # CORS headers
+#     header {
+#         Access-Control-Allow-Origin "https://hygieiai.ignorelist.com"
+#         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+#         Access-Control-Allow-Headers "Content-Type, Authorization"
+#     }
+#     
+#     log {
+#         output file /var/log/caddy/api-access.log
+#         format json
+#     }
+# }
