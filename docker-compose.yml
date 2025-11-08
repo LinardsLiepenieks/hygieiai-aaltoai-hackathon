@@ -53,3 +53,12 @@ services:
       - ./response_agent:/app:cached
     command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
     restart: unless-stopped
+
+  schedule_agent:
+    build: ./schedule_agent
+    ports:
+       - '8004:8004'
+    volumes:
+       - ./schedule_agent:/app:cached
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8004 --reload
+    restart: unless-stopped
