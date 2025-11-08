@@ -41,7 +41,7 @@ export default function Home() {
     };
     setChatHistory((prev) => [...prev, userMessage]);
 
-    setStatus('Sending to backend…');
+    setStatus('Thinking');
     const userText = text.trim();
     setText(''); // Clear input after sending
 
