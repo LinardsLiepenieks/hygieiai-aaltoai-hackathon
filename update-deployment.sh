@@ -23,7 +23,14 @@ echo "🏗️  Rebuilding frontend with environment variables..."
 export NEXT_PUBLIC_BACKEND_URL="https://hygieiai.chickenkiller.com/api"
 export NEXT_PUBLIC_SCHEDULE_AGENT_URL="https://hygieiai.chickenkiller.com/api"
 
-docker compose -f docker-compose.prod.yml build --no-cache frontend
+# Stop frontend first
+docker compose -f docker-compose.prod.yml stop frontend
+
+# Build with env vars passed as build args
+docker compose -f docker-compose.prod.yml build --no-cache \
+  --build-arg NEXT_PUBLIC_BACKEND_URL="https://hygieiai.chickenkiller.com/api" \
+  --build-arg NEXT_PUBLIC_SCHEDULE_AGENT_URL="https://hygieiai.chickenkiller.com/api" \
+  frontend
 
 echo "🚀 Restarting frontend service..."
 docker compose -f docker-compose.prod.yml up -d frontend
