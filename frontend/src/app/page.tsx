@@ -45,8 +45,11 @@ export default function Home() {
     const userText = text.trim();
     setText(''); // Clear input after sending
 
+    const BACKEND_URL =
+      process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
     try {
-      const res = await fetch('http://localhost:8000/post', {
+      const res = await fetch(`${BACKEND_URL}/post`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: userText }),

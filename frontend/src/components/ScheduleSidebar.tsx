@@ -23,12 +23,15 @@ export default function ScheduleSidebar({
 
   const { speak } = useTextToSpeech();
 
+  const SCHEDULE_AGENT_URL =
+    process.env.NEXT_PUBLIC_SCHEDULE_AGENT_URL || 'http://localhost:8004';
+
   const startDemo = async () => {
     setMessages([]);
     setStatus('ongoing');
     try {
       const r = await fetch(
-        `http://localhost:8004/schedule/start?service=${encodeURIComponent(
+        `${SCHEDULE_AGENT_URL}/schedule/start?service=${encodeURIComponent(
           scenario
         )}`,
         { cache: 'no-store' }
@@ -60,7 +63,7 @@ export default function ScheduleSidebar({
     setMessages((m) => [...m, { role: 'user', text: t }]);
     setInput('');
     try {
-      const r = await fetch(`http://localhost:8004/schedule/post`, {
+      const r = await fetch(`${SCHEDULE_AGENT_URL}/schedule/post`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, text: t }),
