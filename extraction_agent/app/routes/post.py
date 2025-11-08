@@ -49,7 +49,7 @@ async def receive_post(request: Request):
         if final_msg:
             print("Fetched FINAL_MESSAGE from summary_agent:", final_msg)
 
-        processed = process_text(received_text)
+        processed = process_text(received_text, final_msg)
         print("PROCESSED", processed)
     except Exception as e:
         print("agent.process_text failed:", e)

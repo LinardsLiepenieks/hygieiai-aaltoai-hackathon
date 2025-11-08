@@ -6,6 +6,7 @@ from typing import List
 
 
 def build_llm_prompt(
+    memory: str,
     text: str,
     intent: str,
     essence: str,
@@ -21,6 +22,7 @@ def build_llm_prompt(
 
     prompt = f"""USER MESSAGE:
 {text}
+MEMORY: {memory}
 
 CLASSIFICATION RESULTS:
 - Intent: {intent}
@@ -37,6 +39,9 @@ SAFETY FLAGS:
 
 INSTRUCTIONS:
 """
+    "Use the memory only if relevant to this message. You can use it to draw links to current topics, "
+    "like if the user mentioned in the past that they have back pain, and in a new message they mention they have pain "
+    "without specifying, you might assume or ask if this is related to their aforementioned back pain"
 
     if intent == "emergency_candidate":
         prompt += """This is a POTENTIAL EMERGENCY situation.

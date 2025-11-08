@@ -123,7 +123,7 @@ def _or_chat(model: str, system: str, user: str, json_mode: bool = False) -> str
 
 
 # ---- public entrypoint for your service ----
-def process_text(text: Optional[str]) -> None:
+def process_text(text: Optional[str], memory):
     if text is None:
         print("agent.process_text called with no text")
         return
@@ -201,6 +201,7 @@ def process_text(text: Optional[str]) -> None:
         print("[SKIP STORE] smalltalk or non-medical")
 
     llm_prompt = build_llm_prompt(
+        memory=memory,
         text=text,
         intent=intent,
         essence=cls.get("essence", ""),
