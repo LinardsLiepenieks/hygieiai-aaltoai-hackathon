@@ -4,9 +4,14 @@ import { useState } from 'react';
 import useRecording from '../hooks/useRecording';
 import useTextToSpeech from '../hooks/useTextToSpeech';
 import ScheduleSidebar from '@/components/ScheduleSidebar';
+import Navbar from '@/components/Navbar';
+import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
 
 export default function Home() {
   const [text, setText] = useState<string>('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+
   const {
     status,
     isRecording,
@@ -26,15 +31,38 @@ export default function Home() {
 
   const sendPost = async () => {
     if (!text.trim()) return;
+
+    // Add user message to chat history
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      text: text.trim(),
+      sender: 'user',
+      timestamp: new Date(),
+    };
+    setChatHistory((prev) => [...prev, userMessage]);
+
     setStatus('Sending to backend…');
+    const userText = text.trim();
+    setText(''); // Clear input after sending
+
     try {
       const res = await fetch('http://localhost:8000/post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.trim() }),
+        body: JSON.stringify({ text: userText }),
       });
       const msg = await res.text();
       setStatus('Sent: ' + msg);
+
+      // Add AI response to chat history
+      const aiMessage: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        text: msg,
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+      setChatHistory((prev) => [...prev, aiMessage]);
+
       try {
         if (msg && typeof speak === 'function') speak(msg);
       } catch (ttsErr) {
@@ -48,43 +76,61 @@ export default function Home() {
 
   return (
     <div className="flex h-screen">
-      {/* Left: your existing UI unchanged */}
-      <div className="flex-1 min-w-0">
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-8 text-center">
-              <h1 className="text-4xl font-bold mb-2">ElevenLabs Scribe</h1>
-              <p className="text-indigo-100">Tap mic to speak • Tap again to stop</p>
+      {/* Left: your existing UI with navbar */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Navbar */}
+        <Navbar
+          onCallClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          hasNotification={!isSidebarOpen}
+        />
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50">
+          <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col h-full">
+            {/* Header */}
+            <div className="mb-4">
+              <h1 className="text-2xl font-bold text-gray-800 mb-1">
+                You're talking with Jesse
+              </h1>
+              <p className="text-sm text-gray-500">
+                Tap mic to speak • Tap again to stop
+              </p>
             </div>
 
-            <div className="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 px-6 py-4 font-semibold text-center">
-              {status}
+            {/* Status */}
+            <div className="mb-4">
+              <p className="text-sm italic text-gray-600">{status}</p>
             </div>
 
-            <div className="p-6">
+            {/* Chat History */}
+            <ChatHistory messages={chatHistory} />
+
+            {/* Textarea - 2 lines, above buttons */}
+            <div className="mb-3">
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                rows={8}
-                className="w-full p-5 text-lg text-black bg-white/80 border-2 border-indigo-200 rounded-2xl focus:border-indigo-500 focus:outline-none resize-none transition-all shadow-inner"
+                rows={2}
+                className="w-full p-3 text-base text-gray-800 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
                 placeholder="Your transcription appears here..."
               />
             </div>
 
-            <div className="px-6 pb-8 flex flex-col sm:flex-row gap-4">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={toggleRecording}
                 onContextMenu={preventDefault}
-                className={`flex-1 py-6 rounded-3xl font-bold text-xl transition-all transform active:scale-95 shadow-xl ${
+                className={`flex-1 py-3 rounded-lg font-semibold text-base transition-all ${
                   isRecording
                     ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
                 } disabled:bg-gray-400 disabled:cursor-not-allowed`}
                 disabled={!hasApiKey}
               >
                 {isRecording ? (
-                  <span className="flex items-center justify-center gap-3">
-                    <span className="w-4 h-4 bg-white rounded-full animate-bounce"></span>
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-2 h-2 bg-white rounded-full animate-bounce"></span>
                     Recording… Tap to Stop
                   </span>
                 ) : (
@@ -95,7 +141,7 @@ export default function Home() {
               <button
                 onClick={() => speak(text)}
                 disabled={!text.trim() || !ttsHasKey}
-                className="flex-none px-5 py-4 rounded-3xl font-semibold text-lg bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow hover:shadow-md disabled:from-gray-300 disabled:cursor-not-allowed transition-all"
+                className="flex-none px-4 py-3 rounded-lg font-semibold text-base bg-sky-500 text-white hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
                 title={ttsStatus}
               >
                 {ttsPlaying ? 'Reading…' : 'Read Text'}
@@ -104,27 +150,17 @@ export default function Home() {
               <button
                 onClick={sendPost}
                 disabled={!text.trim()}
-                className="flex-1 py-6 rounded-3xl font-bold text-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl hover:shadow-2xl disabled:from-gray-400 disabled:cursor-not-allowed transition-all transform active:scale-95"
+                className="flex-1 py-3 rounded-lg font-semibold text-base bg-teal-500 text-white hover:bg-teal-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
               >
                 Send to Backend
               </button>
-            </div>
-
-            <div className="bg-gray-50/80 px-6 py-5 text-sm text-gray-600 border-t text-center">
-              <strong>Tap-to-talk • Works everywhere</strong>
-              <br />
-              Mobile & Desktop • Chrome • Safari • Firefox
-              <br />
-              <span className="text-xs text-gray-500 mt-2 block">
-                Now with reliable tap-to-record • No hold required
-              </span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right: scheduling sidebar */}
-      <ScheduleSidebar />
+      <ScheduleSidebar isOpen={isSidebarOpen} />
     </div>
   );
 }

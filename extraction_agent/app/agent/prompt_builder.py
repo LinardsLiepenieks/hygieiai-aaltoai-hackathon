@@ -35,13 +35,13 @@ SAFETY FLAGS:
 - Medically Relevant: {medically_relevant}
 - Emergency Flag: {emergency_flag}
 - Safety Check Passed: {safety_ok}
-- Red Flags: {', '.join(red_flags) if red_flags else 'None'}
+- Red Flags: {', '.join(red_flags) if red_flags else ''}
 
 INSTRUCTIONS:
-"""
     "Use the memory only if relevant to this message. You can use it to draw links to current topics, "
     "like if the user mentioned in the past that they have back pain, and in a new message they mention they have pain "
     "without specifying, you might assume or ask if this is related to their aforementioned back pain"
+"""
 
     if intent == "emergency_candidate":
         prompt += """This is a POTENTIAL EMERGENCY situation.
