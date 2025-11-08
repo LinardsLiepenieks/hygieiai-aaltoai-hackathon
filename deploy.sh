@@ -12,13 +12,17 @@ fi
 
 echo "📍 Detected IP: $DATACRUNCH_IP"
 
-# Set environment variables
+# Set environment variables for Next.js build
+# IMPORTANT: These must be set BEFORE building the frontend container
+# Next.js bakes NEXT_PUBLIC_* variables into the build at build time
+export NEXT_PUBLIC_ELEVENLABS_API_KEY="${NEXT_PUBLIC_ELEVENLABS_API_KEY:-sk_5481606b3a245b139ed118cf775c1fc9ce2f03b30500dacc}"
 export NEXT_PUBLIC_BACKEND_URL="http://${DATACRUNCH_IP}:8000"
 export NEXT_PUBLIC_SCHEDULE_AGENT_URL="http://${DATACRUNCH_IP}:8004"
 
 echo "🔧 Environment configured:"
 echo "   NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL"
 echo "   NEXT_PUBLIC_SCHEDULE_AGENT_URL=$NEXT_PUBLIC_SCHEDULE_AGENT_URL"
+echo "   NEXT_PUBLIC_ELEVENLABS_API_KEY=sk_****...${NEXT_PUBLIC_ELEVENLABS_API_KEY: -4}"
 
 # Check if .env exists
 if [ ! -f .env ]; then
